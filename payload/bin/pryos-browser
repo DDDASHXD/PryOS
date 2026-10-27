@@ -1,14 +1,20 @@
 #!/usr/bin/env bash
 set -euo pipefail
+export PATH="/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
 if [[ ${1:-} == --version ]]; then exec /usr/bin/helium --version; fi
 if [[ $EUID != 0 ]]; then exec /usr/bin/helium "$@"; fi
 browser_user=pryos-browser
 browser_home=/home/pryos-browser
 browser_uid=$(id -u "$browser_user")
 install -d -m 0700 -o "$browser_user" -g "$browser_user" "$browser_home" "$browser_home/.config" "$browser_home/.cache" "/run/user/$browser_uid"
+# A chroot cannot load the package profile into the target kernel during install.
+# Load the upstream profile in the live kernel, retaining Ubuntu's userns restriction.
+if [[ -r /sys/module/apparmor/parameters/enabled && $(cat /sys/module/apparmor/parameters/enabled) == Y && -f /opt/helium/apparmor.cfg ]]; then
+  /usr/sbin/apparmor_parser -r /opt/helium/apparmor.cfg
+fi
 # Permit only this local identity on the current X11 display, not all clients.
 xhost +SI:localuser:"$browser_user" >/dev/null
-exec runuser -u "$browser_user" -- env HOME="$browser_home" USER="$browser_user" LOGNAME="$browser_user" \
+exec /usr/sbin/runuser -u "$browser_user" -- env HOME="$browser_home" USER="$browser_user" LOGNAME="$browser_user" \
   DISPLAY="${DISPLAY:-:0}" XAUTHORITY=/dev/null XDG_RUNTIME_DIR="/run/user/$browser_uid" \
   XDG_CONFIG_HOME="$browser_home/.config" XDG_CACHE_HOME="$browser_home/.cache" \
-  dbus-run-session -- /usr/bin/helium --user-data-dir="$browser_home/.config/helium" "$@"
+  dbus-run-session -- /usr/bin/helium --password-store=basic --user-data-dir="$browser_home/.config/helium" "$@"

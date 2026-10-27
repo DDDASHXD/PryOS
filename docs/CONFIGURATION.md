@@ -52,6 +52,8 @@ The signing key is pinned in `payload/keys/helium.asc` and verified by primary f
 
 `pryos-browser` is the default URI/HTML browser and desktop launcher. Under the root desktop it authorizes only the dedicated local browser identity on X11 and uses `runuser` plus a private D-Bus session. The browser remains unprivileged, its password is locked, and Chromium's sandbox is not disabled. Its profile lives in the temporary `/home/pryos-browser` home. AI shells remain root and do not need a password to launch it.
 
+The launcher loads the packaged Helium AppArmor profile into the live kernel when needed and uses Chromium's basic password store instead of prompting to create a desktop keyring. Browser data remains in the disposable profile. The desktop environment explicitly includes `/usr/sbin` and the other system command directories in PATH so root-only recovery tools are available from GUI launchers and terminals.
+
 ## Persistence
 
 Do not configure a Ventoy persistence mapping for the ISO, including wildcard mappings. Every included boot entry has `nopersistent`. Package changes, user homes, preferences and agent logins are discarded with the overlay. Explicit writes to disks or external services persist. Export only the files/reports you actually intend to keep.

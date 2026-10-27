@@ -58,7 +58,7 @@ curl -fsSL --retry 4 https://claude.ai/install.sh -o /tmp/install-claude.sh
 HOME=/opt/claude bash /tmp/install-claude.sh stable
 ln -sfn "$(readlink -f /opt/claude/.local/bin/claude)" /usr/local/bin/claude
 chmod -R a+rX /opt/claude /opt/recovery-node /opt/recovery-ai
-printf 'export DISABLE_AUTOUPDATER=1\nexport PATH="/opt/recovery/custom:/usr/local/bin:$PATH"\n' > /etc/profile.d/recovery-ai.sh
+printf 'export DISABLE_AUTOUPDATER=1\nexport PATH="/opt/recovery/custom:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"\n' > /etc/profile.d/recovery-ai.sh
 claude --version
 gemini --version
 opencode --version
@@ -73,6 +73,7 @@ cat > /etc/pam.d/recovery-autologin <<'EOF'
 auth required pam_permit.so
 account required pam_permit.so
 session required pam_unix.so
+session required pam_env.so
 session optional pam_systemd.so
 EOF
 cat > /etc/systemd/system/recovery-live-setup.service <<'EOF'
@@ -93,6 +94,7 @@ systemctl set-default graphical.target
 ln -sfn /usr/lib/systemd/system/lightdm.service /etc/systemd/system/display-manager.service
 echo /usr/sbin/lightdm > /etc/X11/default-display-manager
 printf '#!/bin/sh\nexec startxfce4\n' > /etc/skel/.xsession
+printf 'export PATH="/opt/recovery/custom:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"\nexport BROWSER=pryos-browser\n' > /etc/skel/.xsessionrc
 chmod +x /etc/skel/.xsession
 cat > /etc/skel/.config/autostart/recovery-desktop.desktop <<'EOF'
 [Desktop Entry]

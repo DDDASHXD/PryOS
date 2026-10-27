@@ -4,6 +4,7 @@ set -euo pipefail
 [[ -e /run/casper.log || -d /run/live || -d /cdrom/casper || $(findmnt -n -o FSTYPE /) == overlay ]] || exit 0
 install -d /root/Desktop /root/Recovery /root/.config
 rsync -a --ignore-existing /etc/skel/ /root/
+printf 'PATH="/opt/recovery/custom:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"\n' > /etc/environment
 cat > /etc/lightdm/lightdm.conf <<'EOF'
 [Seat:*]
 autologin-user=root
