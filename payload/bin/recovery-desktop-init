@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+set -u
+for launcher in "$HOME"/Desktop/*.desktop; do
+  gio set "$launcher" metadata::trusted true 2>/dev/null || true
+done
+xfconf-query -c xfwm4 -p /general/use_compositing -n -t bool -s false 2>/dev/null || true
+xfconf-query -c thunar-volman -p /automount-drives/enabled -n -t bool -s false 2>/dev/null || true
+xfconf-query -c thunar-volman -p /automount-media/enabled -n -t bool -s false 2>/dev/null || true
+while IFS= read -r property; do
+  [[ $property == */last-image ]] || continue
+  xfconf-query -c xfce4-desktop -p "$property" -s /usr/share/backgrounds/pryos.svg 2>/dev/null || true
+done < <(xfconf-query -c xfce4-desktop -l 2>/dev/null)

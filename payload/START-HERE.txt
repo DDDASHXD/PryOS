@@ -1,0 +1,36 @@
+PryOS - XFCE ROOT LIVE SESSION
+
+The desktop and terminal run as root. No sudo/root password is needed.
+Changes to attached disks are permanent even though this OS resets on reboot.
+AI permission/trust prompts are independent of Linux authentication.
+
+Desktop shortcuts include Codex, Claude Code, Gemini CLI and OpenCode.
+Use AI Agents to choose one, or open several agent terminals at the same time.
+Connect to Wi-Fi/Ethernet first, then sign in with your own provider account.
+Claude uses /login; OpenCode uses /connect; Gemini offers Google sign-in.
+OpenCode also supports multiple providers and configured local model endpoints.
+Helium is the default browser. It runs under a dedicated unprivileged browser
+user so its Chromium sandbox stays enabled, without any password prompt.
+For phone-based login: open a terminal and run codex login --device-auth.
+No account credentials are included in this image.
+
+INSPECT FIRST
+  recovery-inventory
+  lsblk -o NAME,SIZE,FSTYPE,LABEL,MODEL,SERIAL,MOUNTPOINTS
+  sudo recovery-mount-windows /dev/YOUR_WINDOWS_PARTITION /mnt/windows
+  windows-inspect /mnt/windows
+
+The Windows mount helper uses read-only NTFS access. It cannot unlock BitLocker.
+GParted is in the application menu. testdisk, photorec, ddrescue, smartctl,
+efibootmgr, chntpw, nvme, dislocker, and filesystem tools are in the terminal.
+Your custom scripts live in /opt/recovery/custom.
+Tools and diagnostics also have desktop shortcuts. Tool guides open a root shell.
+
+SAVE YOUR WORK
+The live home directory, added packages, settings and Codex login disappear on
+reboot when booted without persistence. Save reports and recovered files to a
+different healthy disk before shutting down. Never recover onto the source.
+Changes to actual disks and EFI settings remain after reboot.
+
+For failing hardware, prefer making an image with ddrescue before repairs.
+Confirm source/destination identity and capacity before every disk-writing step.

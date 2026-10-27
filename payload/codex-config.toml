@@ -1,0 +1,4 @@
+# All of these files live in the temporary live user's home directory.
+cli_auth_credentials_store = "file"
+approval_policy = "on-request"
+sandbox_mode = "danger-full-access"

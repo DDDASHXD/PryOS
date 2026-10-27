@@ -1,0 +1,13 @@
+#!/usr/bin/env bash
+set -euo pipefail
+printf '\n== Firmware ==\n'
+if [[ -d /sys/firmware/efi ]]; then echo UEFI; else echo 'Legacy BIOS (or EFI not exposed)'; fi
+printf '\n== Disks (serials omitted; use lsblk -o +SERIAL locally if needed) ==\n'
+lsblk -o NAME,PATH,SIZE,TYPE,FSTYPE,LABEL,MOUNTPOINTS,MODEL,RO
+printf '\n== Mounts ==\n'
+findmnt -r -o TARGET,SOURCE,FSTYPE,OPTIONS
+printf '\n== Memory ==\n'
+free -h
+printf '\n== Hardware ==\n'
+lspci -nn
+printf '\n== Notes ==\nRead-only inventory; no repairs performed. Review output before sharing.\n'

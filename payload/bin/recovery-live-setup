@@ -1,0 +1,18 @@
+#!/usr/bin/env bash
+set -euo pipefail
+# Runs after Casper's initramfs customization and before the display manager.
+[[ -e /run/casper.log || -d /run/live || -d /cdrom/casper || $(findmnt -n -o FSTYPE /) == overlay ]] || exit 0
+install -d /root/Desktop /root/Recovery /root/.config
+rsync -a --ignore-existing /etc/skel/ /root/
+cat > /etc/lightdm/lightdm.conf <<'EOF'
+[Seat:*]
+autologin-user=root
+autologin-user-timeout=0
+autologin-session=xfce
+user-session=xfce
+pam-autologin-service=recovery-autologin
+greeter-hide-users=true
+allow-guest=false
+EOF
+printf '[Desktop]\nSession=xfce\n' > /root/.dmrc
+chmod 0755 /root/Desktop/*.desktop

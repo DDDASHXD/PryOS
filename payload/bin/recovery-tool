@@ -1,0 +1,21 @@
+#!/usr/bin/env bash
+set -euo pipefail
+if [[ $EUID != 0 ]]; then exec sudo -n -H "$0" "$@"; fi
+mkdir -p /root/Recovery
+cd /root/Recovery
+case ${1:-inventory} in
+  inventory) recovery-inventory;;
+  testdisk) testdisk;;
+  photorec) photorec;;
+  smart) lsblk -d -o NAME,SIZE,MODEL,SERIAL; smartctl --scan; echo; echo 'Run: smartctl -a /dev/YOUR_DISK';;
+  nvme) nvme list;;
+  efi) efibootmgr -v || true;;
+  ntfs) lsblk -o NAME,SIZE,FSTYPE,LABEL,MOUNTPOINTS; echo; echo 'Read-only mount: recovery-mount-windows /dev/PARTITION /mnt/windows'; echo 'Inspect: windows-inspect /mnt/windows'; echo 'Other tools: ntfsinfo, ntfsundelete, ntfsclone, ntfsfix (writes: request repair explicitly).';;
+  windows) lsblk -o NAME,SIZE,FSTYPE,LABEL,MOUNTPOINTS; echo; echo 'Mount NTFS read-only with recovery-mount-windows, then run windows-inspect on that mount.';;
+  ddrescue) lsblk -d -o NAME,SIZE,MODEL,SERIAL; printf '\nGNU ddrescue: confirm source and destination before running.\nExample for an IMAGE FILE on a DIFFERENT HEALTHY DISK:\n  ddrescue -n /dev/SOURCE /mnt/healthy/disk.img /mnt/healthy/disk.map\nContinue with a persistent mapfile; never recover onto the source.\n';;
+  passwords) echo 'chntpw is installed for authorized offline LOCAL-account recovery.'; echo 'Mount and identify the correct Windows installation first. Editing its SAM writes to disk.'; chntpw -h || true;;
+  *) echo 'Unknown recovery tool' >&2; exit 2;;
+esac
+echo
+echo 'Root shell ready. Exit to close this tool window.'
+exec bash -i

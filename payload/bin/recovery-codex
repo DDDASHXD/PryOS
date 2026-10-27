@@ -1,0 +1,9 @@
+#!/usr/bin/env bash
+set -euo pipefail
+mkdir -p "$HOME/Recovery" "$HOME/.codex"
+if [[ ! -f $HOME/Recovery/AGENTS.md ]]; then cp /opt/recovery/AGENTS.md "$HOME/Recovery/AGENTS.md"; fi
+cd "$HOME/Recovery"
+echo 'Recovery Codex: connect to the internet, then sign in if prompted.'
+echo 'This session disappears on reboot. Changes to real disks do not.'
+if [[ $EUID != 0 ]]; then exec sudo -n -H "$0" "$@"; fi
+exec codex --sandbox danger-full-access --ask-for-approval on-request "$@"

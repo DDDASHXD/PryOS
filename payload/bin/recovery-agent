@@ -1,0 +1,19 @@
+#!/usr/bin/env bash
+set -euo pipefail
+if [[ $EUID != 0 ]]; then exec sudo -n -H "$0" "$@"; fi
+mkdir -p /root/Recovery
+cd /root/Recovery
+case ${1:-choose} in
+  codex) exec recovery-codex ;;
+  claude) exec claude ;;
+  gemini) exec gemini ;;
+  opencode) exec opencode ;;
+  choose)
+    selection=$(zenity --list --title='PryOS AI agents' --text='Choose an agent. Open multiple launchers to work in separate terminals. Each provider needs your own sign-in.' --column=Agent Codex 'Claude Code' 'Gemini CLI' OpenCode --height=340 --width=580) || exit 0
+    case $selection in
+      Codex) agent=codex;; 'Claude Code') agent=claude;; 'Gemini CLI') agent=gemini;; OpenCode) agent=opencode;; *) exit 0;;
+    esac
+    exec xfce4-terminal --disable-server --title="Recovery - $selection" --command="recovery-agent $agent"
+    ;;
+  *) echo 'Usage: recovery-agent [codex|claude|gemini|opencode|choose]' >&2; exit 2;;
+esac

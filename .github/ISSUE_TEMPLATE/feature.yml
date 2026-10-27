@@ -1,0 +1,15 @@
+name: Feature request
+description: Suggest a recovery workflow or build improvement
+body:
+  - type: textarea
+    id: need
+    attributes:
+      label: Recovery need
+      description: What task would this enable, and how should it behave?
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives and package sources
+      description: Link official upstream documentation and licenses for suggested tools.

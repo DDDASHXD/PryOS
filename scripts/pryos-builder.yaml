@@ -1,0 +1,13 @@
+# x86_64 on both Intel and Apple Silicon; the latter uses slower full CPU emulation.
+vmType: qemu
+arch: x86_64
+cpus: 4
+memory: 8GiB
+disk: 100GiB
+images:
+  - location: https://cloud-images.ubuntu.com/noble/current/noble-server-cloudimg-amd64.img
+    arch: x86_64
+mounts: []
+containerd:
+  system: false
+  user: false

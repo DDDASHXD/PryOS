@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+set -euo pipefail
+[[ $# == 1 && -d $1 ]] || { echo 'Usage: windows-inspect /mnt/windows' >&2; exit 2; }
+root=$(realpath -- "$1")
+printf '== Mount containing %s ==\n' "$root"
+findmnt --target "$root"
+printf '\n== Windows markers ==\n'
+for rel in Windows Windows/System32/config/SYSTEM Windows/System32/config/SOFTWARE Windows/System32/winload.efi Boot/BCD EFI/Microsoft/Boot/BCD Windows/Minidump Windows/MEMORY.DMP; do
+  if [[ -e $root/$rel ]]; then stat --printf='%F | %s bytes | %y | %n\n' -- "$root/$rel"; fi
+done
+printf '\nThis reports metadata only; registry contents and personal files were not read.\n'
+printf 'Paths are case-sensitive here. Missing markers may mean a different Windows layout.\n'

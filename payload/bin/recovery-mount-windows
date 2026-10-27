@@ -1,0 +1,15 @@
+#!/usr/bin/env bash
+set -euo pipefail
+[[ $EUID == 0 ]] || { echo 'Use sudo.' >&2; exit 1; }
+[[ $# == 2 ]] || { echo 'Usage: sudo recovery-mount-windows /dev/PARTITION /mnt/windows' >&2; exit 2; }
+dev=$(readlink -f -- "$1")
+target=$(realpath -m -- "$2")
+[[ -b $dev ]] || { echo 'Source must be a block device.' >&2; exit 1; }
+[[ $target == /mnt/* && $target != /mnt/ ]] || { echo 'Choose a mountpoint beneath /mnt/.' >&2; exit 1; }
+if findmnt -rn -S "$dev" | grep -q .; then echo 'Source is already mounted; inspect it first.' >&2; exit 1; fi
+if mountpoint -q "$target"; then echo 'Target is already mounted.' >&2; exit 1; fi
+[[ $(blkid -p -s TYPE -o value "$dev") == ntfs ]] || { echo 'Source is not plain NTFS (possibly encrypted).' >&2; exit 1; }
+mkdir -p -- "$target"
+[[ -z $(ls -A -- "$target") ]] || { echo 'Target directory must be empty.' >&2; exit 1; }
+mount -t ntfs-3g -o ro,norecover,nodev,nosuid,noexec -- "$dev" "$target"
+findmnt --target "$target"
