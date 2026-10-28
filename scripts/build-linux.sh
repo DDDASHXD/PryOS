@@ -3,14 +3,22 @@
 set -Eeuo pipefail
 export LC_ALL=C
 project=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)
-[[ $(uname -s) == Linux && $EUID == 0 ]] || { echo 'Run with sudo inside an amd64 Linux environment.' >&2; exit 1; }
-[[ $(dpkg --print-architecture) == amd64 ]] || { echo 'The recovery image currently targets amd64. On Apple Silicon use the x86_64 Lima VM.' >&2; exit 1; }
+[[ $(uname -s) == Linux && $EUID == 0 ]] || { echo 'Run with sudo inside Ubuntu amd64 or arm64.' >&2; exit 1; }
+arch=$(dpkg --print-architecture)
+[[ $arch == amd64 || $arch == arm64 ]] || { echo "PryOS builds on Ubuntu amd64 or arm64. This machine is ${arch}." >&2; exit 1; }
+if [[ -n ${PRYOS_ARCH:-} && $PRYOS_ARCH != "$arch" ]]; then echo "PRYOS_ARCH is ${PRYOS_ARCH} but this system is ${arch}." >&2; exit 1; fi
+export PRYOS_ARCH=$arch
 if [[ ${PRYOS_MOUNT_NAMESPACE:-} != private ]]; then
   exec unshare --mount --propagation private env PRYOS_MOUNT_NAMESPACE=private bash "$project/scripts/build-linux.sh" "$@"
 fi
 # Source files are executable configuration: review local overrides before building.
 source "$project/config/build.env"
+source "$project/config/${arch}.env"
 if [[ -f $project/config/local.env ]]; then source "$project/config/local.env"; fi
+case $BASE_ISO_NAME in
+  *"$arch"*) ;;
+  *) echo "Base ISO ${BASE_ISO_NAME} does not match this ${arch} builder." >&2; exit 1 ;;
+esac
 export PRYOS_VERSION
 work=$(realpath -m -- "${PRYOS_WORK_DIR:-/var/tmp/pryos-build}")
 output=$(realpath -m -- "${PRYOS_OUTPUT_DIR:-$project/out}")
@@ -20,7 +28,7 @@ case $(findmnt -n -o FSTYPE --target "$work") in
   9p|drvfs|virtiofs|cifs|fuse.*) echo 'Working directory must be on a Linux filesystem, not a host share.' >&2; exit 1;;
 esac
 for executable in xorriso mksquashfs rsync curl python3 mount unshare; do command -v "$executable" >/dev/null || { echo 'Install builder dependencies using scripts/setup-linux.sh.' >&2; exit 1; }; done
-out="$output/pryos-amd64.iso"
+out="$output/pryos-${arch}.iso"
 if [[ -e $out && ${PRYOS_FORCE:-0} != 1 ]]; then echo "Output exists: $out. Move it aside or set PRYOS_FORCE=1 to replace it atomically." >&2; exit 1; fi
 exec > >(tee -a "$output/build.log") 2>&1
 trap 'echo "Build failed near line $LINENO. See the build log." >&2' ERR
@@ -77,7 +85,7 @@ if [[ ! -f $work/root.ok ]]; then
   for name in minimal.standard.live minimal.standard minimal; do umount "$work/layers/$name"; done
   touch "$work/root.ok"
 fi
-fingerprint=$(python3 "$project/tools/fingerprint.py" "$project/payload" "$project/config/build.env" "$project/scripts/build-linux.sh")
+fingerprint=$(python3 "$project/tools/fingerprint.py" "$project/payload" "$project/config/build.env" "$project/config/${arch}.env" "$project/scripts/build-linux.sh")
 fingerprint="$fingerprint-$PRYOS_VERSION-$BASE_ISO_SHA256"
 rebuilt=0
 if [[ ${PRYOS_REFRESH:-0} == 1 || ! -f $work/customized.fingerprint || $(cat "$work/customized.fingerprint") != "$fingerprint" ]]; then
@@ -129,16 +137,16 @@ fi
 cp "$root/opt/recovery/build-info.txt" "$output/build-info.txt"
 cp "$root/opt/recovery/ai-versions.txt" "$output/ai-versions.txt"
 python3 "$project/prepare-boot.py" "$tree" "$casper"
-rm -f "$work/pryos-amd64.partial.iso"
-xorriso -indev "$iso" -outdev "$work/pryos-amd64.partial.iso" -volid PRYOS \
+rm -f "$work/pryos-${arch}.partial.iso"
+xorriso -indev "$iso" -outdev "$work/pryos-${arch}.partial.iso" -volid PRYOS \
   -rm_r /casper /pool /dists -- -map "$casper" /casper \
   -map "$tree/boot/grub/grub.cfg" /boot/grub/grub.cfg \
   -map "$tree/boot/grub/loopback.cfg" /boot/grub/loopback.cfg \
   -map "$tree/md5sum.txt" /md5sum.txt -map "$tree/.disk/info" /.disk/info \
   -boot_image any replay -commit -end
-mv "$work/pryos-amd64.partial.iso" "$work/pryos-amd64.iso"
-python3 "$project/tools/copy-image.py" "$work/pryos-amd64.iso" "$out.partial"
-python3 "$project/tools/hash-image.py" "$out.partial" "$(python3 "$project/tools/hash-image.py" "$work/pryos-amd64.iso")"
+mv "$work/pryos-${arch}.partial.iso" "$work/pryos-${arch}.iso"
+python3 "$project/tools/copy-image.py" "$work/pryos-${arch}.iso" "$out.partial"
+python3 "$project/tools/hash-image.py" "$out.partial" "$(python3 "$project/tools/hash-image.py" "$work/pryos-${arch}.iso")"
 mv -f "$out.partial" "$out"
 python3 "$project/tools/hash-image.py" "$out" > "$out.sha256.tmp"
 python3 - "$out" <<'PY'

@@ -8,7 +8,8 @@ if [[ ${PRYOS_VERIFY_NAMESPACE:-} != private ]]; then
 fi
 work=$(realpath -m -- "${PRYOS_WORK_DIR:-/var/tmp/pryos-build}")
 output=$(realpath -m -- "${PRYOS_OUTPUT_DIR:-$project/out}")
-iso=${1:-$output/pryos-amd64.iso}
+arch=$(dpkg --print-architecture)
+iso=${1:-$output/pryos-${arch}.iso}
 root="$work/root"
 mounted="$work/verify-mount"
 [[ -f $iso && -f $root/etc/casper.conf ]] || { echo 'Build first, and use the matching PRYOS_WORK_DIR.' >&2; exit 1; }

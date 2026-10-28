@@ -1,0 +1,13 @@
+# Native ARM64 Ubuntu on Apple Silicon. Uses the Mac hypervisor.
+vmType: vz
+arch: aarch64
+cpus: 4
+memory: 8GiB
+disk: 100GiB
+images:
+  - location: https://cloud-images.ubuntu.com/noble/current/noble-server-cloudimg-arm64.img
+    arch: aarch64
+mounts: []
+containerd:
+  system: false
+  user: false

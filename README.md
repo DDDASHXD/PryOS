@@ -1,30 +1,30 @@
 # PryOS
 
-**A fresh recovery workstation on every boot.**
+PryOS is a live Ubuntu system. It boots to an XFCE desktop as root, with disk tools and AI agents already installed.
 
-PryOS is an Ubuntu-based, nonpersistent recovery live ISO with XFCE, Helium, disk/Windows diagnostics, and preinstalled AI agent clients. It boots to a root desktop so recovery commands do not need a Linux password. AI clients are **signed out** and use your own accounts.
+The live system resets on reboot. Writes to real disks stay.
 
-## Included
+## Images
 
-- **XFCE** with recovery applications and guides on the desktop.
-- **Helium by imput** as the default browser, launched as a dedicated unprivileged user so Chromium's sandbox stays enabled.
-- **Codex, Claude Code, Gemini CLI and OpenCode**, with individual launchers and an agent chooser. Open several terminals to use different agents; this is not an automatic cross-provider orchestration service.
-- GParted, TestDisk, PhotoRec, GSmartControl/smartmontools, NTFS tools, ddrescue, NVMe tools, efibootmgr, chntpw, dislocker, cryptsetup, partclone and custom Windows inspection scripts.
-- A writable live session that resets after reboot. No installer, Snap daemon, account credentials, API keys or local model weights are bundled.
+- `out/pryos-amd64.iso` for x86-64 PCs
+- `out/pryos-arm64.iso` for ARM64 machines that boot with UEFI
 
-**Disk changes are permanent.** Resetting the live OS does not undo writes to attached drives or EFI NVRAM. Root access and AI permission dialogs are separate. Read [the recovery/security boundaries](SECURITY.md) before using it on important disks.
+## On the image
+
+- XFCE
+- Codex, Claude Code, Gemini CLI, and OpenCode
+- GParted, TestDisk, PhotoRec, GSmartControl, NTFS tools, ddrescue, NVMe tools, efibootmgr, chntpw, dislocker, cryptsetup, and partclone
+- `recovery-inventory`, `recovery-mount-windows`, and `windows-inspect`
+
+Scripts you add under `payload/custom/` are installed to `/opt/recovery/custom`.
 
 ## Build
 
-The output is `out/pryos-amd64.iso`, with a SHA-256 checksum and version reports. The image targets **x86-64 PCs**, including when built from an Apple Silicon Mac.
-
-| Build host | Tools and entry point |
-| --- | --- |
-| Windows | WSL2 + Ubuntu 24.04, PowerShell wrappers |
-| Linux | Ubuntu 24.04 amd64 + squashfs-tools/xorriso/chroot |
-| macOS Intel/Apple Silicon | Homebrew + Lima/QEMU x86-64 Ubuntu VM; Apple Silicon uses slower CPU emulation |
+Plan on at least 40 GB free, 8 GB of RAM for the builder, and a network connection.
 
 ### Linux
+
+Ubuntu 24.04. The image matches the machine. amd64 Ubuntu writes `out/pryos-amd64.iso`. arm64 Ubuntu writes `out/pryos-arm64.iso`.
 
 ```sh
 git clone https://github.com/DDDASHXD/PryOS.git
@@ -35,6 +35,8 @@ sudo bash verify-iso.sh
 ```
 
 ### Windows
+
+WSL2 with Ubuntu 24.04. This builds the x86-64 image.
 
 ```powershell
 git clone https://github.com/DDDASHXD/PryOS.git
@@ -49,22 +51,35 @@ cd PryOS
 brew install git python lima qemu lima-additional-guestagents
 git clone https://github.com/DDDASHXD/PryOS.git
 cd PryOS
-bash scripts/build-macos.sh
 ```
 
-Allow roughly **40–60 GB of free storage**, 8 GB of builder RAM, and internet access. Working files must live on a Linux filesystem. The macOS helper copies source into a Linux VM rather than trying to run `chroot`/SquashFS tools natively on macOS.
+x86-64 PC image:
 
-See [detailed setup/building](docs/BUILDING.md), [configuration](docs/CONFIGURATION.md), and [testing/troubleshooting](docs/TESTING.md). Windows/WSL and Linux image building are validated locally; the macOS helper is provided with source checks and documented upstream tooling, but has not been executed on a Mac in this development environment.
+```sh
+bash scripts/build-macos.sh amd64
+```
+
+ARM64 image. This needs an Apple Silicon Mac:
+
+```sh
+bash scripts/build-macos.sh arm64
+```
+
+With no argument, an Apple Silicon Mac builds the ARM64 image and an Intel Mac builds the PC image.
+
+Details are in [Building](docs/BUILDING.md), [Configuration](docs/CONFIGURATION.md), and [Testing](docs/TESTING.md).
 
 ## Boot
 
-Copy the ISO to Ventoy's data partition **without a persistence mapping**. Choose PryOS's normal, safe graphics or diagnostic text entry. All include `nopersistent`. Secure Boot and physical-device compatibility require testing on your hardware.
+Copy the ISO to a Ventoy stick with persistence left off. The menu has a normal entry, a safe graphics entry, and a text entry.
 
-For VirtualBox: Ubuntu **64-bit**, CPU long mode enabled, two CPUs, around 4 GB RAM, VMSVGA, 128 MB VRAM, 3D acceleration off initially. A 32-bit guest with long mode disabled cannot run this image.
+Boot `pryos-amd64.iso` on an x86-64 PC. In VirtualBox, use a 64-bit machine with long mode on, two CPUs, and about 4 GB of RAM.
 
-The desktop autologs in as root. Connect networking, open an agent, and sign in. Codex supports its normal login and device-code flow where your account permits it; Claude uses `/login`, Gemini offers Google authentication, and OpenCode offers `/connect`. Provider access is not bundled. Helium and agent credentials live in the temporary session.
+Boot `pryos-arm64.iso` on an ARM64 machine with UEFI. On an Apple Silicon Mac, use UTM or `bash scripts/test-qemu.sh out/pryos-arm64.iso`.
 
-## Inspect Windows
+The desktop logs in as root. Connect to a network and open an agent from the desktop.
+
+## Windows disks
 
 ```sh
 recovery-inventory
@@ -73,15 +88,13 @@ recovery-mount-windows /dev/YOUR_WINDOWS_PARTITION /mnt/windows
 windows-inspect /mnt/windows
 ```
 
-The mount helper uses read-only NTFS with journal recovery disabled. It does not unlock BitLocker or remove hibernation. The inspector reports Windows markers and registry-file metadata, not registry contents or personal documents. Recovery guides open a root shell rather than silently choosing a disk or applying repairs. Save recovered files and reports to another healthy disk before reboot.
+`recovery-mount-windows` mounts NTFS read-only. Copy anything you want to keep onto another disk before you shut down.
 
-## Contribute
-
-Read [CONTRIBUTING.md](CONTRIBUTING.md). Source checks run through GitHub Actions on Linux, macOS and Windows:
+## Checks
 
 ```sh
 python3 -m unittest discover -s tests -v
 bash scripts/check.sh
 ```
 
-The repository contains source and configuration, not ISOs, virtual disks or vendor binaries. Original PryOS code/artwork uses [MIT](LICENSE); downloaded software retains its own licensing. See [THIRD_PARTY.md](THIRD_PARTY.md) before redistributing an ISO.
+The repo holds source. Keep built ISOs out of git. Project code is [MIT](LICENSE). Other programs keep their own licenses. See [THIRD_PARTY.md](THIRD_PARTY.md).

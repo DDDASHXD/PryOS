@@ -37,7 +37,7 @@ for name in ("grub.cfg", "loopback.cfg"):
     if name == "loopback.cfg":
         content = content.replace("boot=casper ", "boot=casper iso-scan/filename=${iso_path} ")
     (tree / "boot/grub" / name).write_text(content, encoding="utf-8", newline="\n")
-(tree / ".disk/info").write_text(f"PryOS {os.environ.get('PRYOS_VERSION', '0.1.0')} amd64 - root live session\n")
+(tree / ".disk/info").write_text(f"PryOS {os.environ.get('PRYOS_VERSION', '0.1.0')} {os.environ.get('PRYOS_ARCH', 'amd64')} - root live session\n")
 entries = []
 for path in sorted(tree.rglob("*")):
     rel = path.relative_to(tree)

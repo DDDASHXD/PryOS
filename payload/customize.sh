@@ -4,7 +4,8 @@ set -Eeuo pipefail
 [[ -d /usr/share/initramfs-tools/scripts/casper || -f /usr/share/initramfs-tools/scripts/casper || -d /etc/casper.conf.d || -f /etc/casper.conf ]] || { echo 'No Casper live filesystem found; refusing host customization.' >&2; exit 1; }
 [[ ${RECOVERY_BUILD:-} == cubic || ${RECOVERY_BUILD:-} == chroot ]] || { echo 'Inside Cubic only, run: RECOVERY_BUILD=cubic bash /tmp/payload/customize.sh'; exit 1; }
 . /etc/os-release
-[[ $ID == ubuntu && $VERSION_ID == 24.04 && $(dpkg --print-architecture) == amd64 ]] || { echo 'Requires Ubuntu 24.04 amd64 live root.' >&2; exit 1; }
+arch=$(dpkg --print-architecture)
+[[ $ID == ubuntu && $VERSION_ID == 24.04 && ( $arch == amd64 || $arch == arm64 ) ]] || { echo 'Requires Ubuntu 24.04 amd64 or arm64 live root.' >&2; exit 1; }
 src=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)
 export DEBIAN_FRONTEND=noninteractive
 apt-get update

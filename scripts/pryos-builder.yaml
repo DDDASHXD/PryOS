@@ -1,4 +1,4 @@
-# x86_64 on both Intel and Apple Silicon; the latter uses slower full CPU emulation.
+# PC image builder. On Apple Silicon this is full x86 emulation. Use pryos-builder-arm64.yaml there.
 vmType: qemu
 arch: x86_64
 cpus: 4

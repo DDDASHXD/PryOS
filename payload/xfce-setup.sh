@@ -43,7 +43,12 @@ update-alternatives --set x-www-browser /usr/local/bin/pryos-browser
 if [[ ! -x /opt/recovery-node/bin/node ]]; then
   curl -fsSL --retry 4 https://nodejs.org/dist/index.json -o /tmp/node-index.json
   version=$(python3 -c 'import json; print(next(x["version"] for x in json.load(open("/tmp/node-index.json")) if x["version"].startswith("v22.")))')
-  archive="node-$version-linux-x64.tar.xz"
+  case $(dpkg --print-architecture) in
+    amd64) node_target=linux-x64 ;;
+    arm64) node_target=linux-arm64 ;;
+    *) echo 'No Node.js build for this architecture.' >&2; exit 1 ;;
+  esac
+  archive="node-$version-$node_target.tar.xz"
   curl -fsSL --retry 4 "https://nodejs.org/dist/$version/$archive" -o "/tmp/$archive"
   curl -fsSL --retry 4 "https://nodejs.org/dist/$version/SHASUMS256.txt" -o /tmp/node-shasums
   (cd /tmp && grep "  $archive\$" node-shasums | sha256sum -c -)
