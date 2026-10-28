@@ -38,7 +38,7 @@ For the ARM64 image on an Apple Silicon Mac:
 bash scripts/test-qemu.sh out/pryos-arm64.iso
 ```
 
-UTM can boot that ISO as well. The PC image on a Mac is:
+That opens a QEMU window and attaches an empty disk at `vm-test/disposable.qcow2`. UTM can boot the ISO as well. The PC image on a Mac is:
 
 ```sh
 bash scripts/test-qemu.sh out/pryos-amd64.iso

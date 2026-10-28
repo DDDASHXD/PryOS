@@ -1,0 +1,9 @@
+#!/usr/bin/env bash
+set -u
+# Thunar shows the untrusted-launcher dialog unless the file is executable and this checksum matches.
+dir=${1:-$HOME/Desktop}
+for launcher in "$dir"/*.desktop; do
+  [[ -f $launcher ]] || continue
+  chmod 0755 "$launcher"
+  gio set -t string "$launcher" metadata::xfce-exe-checksum "$(sha256sum "$launcher" | awk '{print $1}')" || true
+done

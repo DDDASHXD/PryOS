@@ -60,7 +60,8 @@ for executable in node npm npx; do ln -sfn "/opt/recovery-node/bin/$executable" 
 npm install --global --prefix /opt/recovery-ai --no-fund --no-audit @google/gemini-cli opencode-ai
 for executable in gemini opencode; do ln -sfn "/opt/recovery-ai/bin/$executable" "/usr/local/bin/$executable"; done
 curl -fsSL --retry 4 https://claude.ai/install.sh -o /tmp/install-claude.sh
-HOME=/opt/claude bash /tmp/install-claude.sh stable
+# The live desktop is root. Host sudo leaks SUDO_USER into this chroot, which the installer now rejects.
+env -u SUDO_USER -u SUDO_UID -u SUDO_GID -u SUDO_COMMAND HOME=/opt/claude CLAUDE_INSTALL_ALLOW_SUDO=1 bash /tmp/install-claude.sh stable
 ln -sfn "$(readlink -f /opt/claude/.local/bin/claude)" /usr/local/bin/claude
 chmod -R a+rX /opt/claude /opt/recovery-node /opt/recovery-ai
 printf 'export DISABLE_AUTOUPDATER=1\nexport PATH="/opt/recovery/custom:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"\n' > /etc/profile.d/recovery-ai.sh
@@ -107,6 +108,7 @@ Type=Application
 Name=PryOS desktop setup
 Exec=recovery-desktop-init
 OnlyShowIn=XFCE;
+X-GNOME-Autostart-Phase=Initialization
 EOF
 cp "$src/AGENTS.md" /etc/skel/Recovery/CLAUDE.md
 cp "$src/AGENTS.md" /etc/skel/Recovery/GEMINI.md

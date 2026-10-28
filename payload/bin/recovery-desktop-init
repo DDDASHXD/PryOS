@@ -1,8 +1,6 @@
 #!/usr/bin/env bash
 set -u
-for launcher in "$HOME"/Desktop/*.desktop; do
-  gio set "$launcher" metadata::trusted true 2>/dev/null || true
-done
+recovery-trust-launchers "$HOME/Desktop"
 xfconf-query -c xfwm4 -p /general/use_compositing -n -t bool -s false 2>/dev/null || true
 xfconf-query -c thunar-volman -p /automount-drives/enabled -n -t bool -s false 2>/dev/null || true
 xfconf-query -c thunar-volman -p /automount-media/enabled -n -t bool -s false 2>/dev/null || true

@@ -21,17 +21,28 @@ if [[ $iso == *arm64* ]]; then
     if [[ -f $candidate ]]; then firmware=$candidate; break; fi
   done
   [[ -n $firmware ]] || { echo 'Install QEMU. The arm64 ISO needs AAVMF firmware (edk2-aarch64-code.fd).' >&2; exit 1; }
+  command -v qemu-img >/dev/null || { echo 'Install QEMU. qemu-img is required for the test disk.' >&2; exit 1; }
   accel=tcg
   cpu=max
   case $(uname -s)-$(uname -m) in
     Darwin-arm64) accel=hvf; cpu=host ;;
     Linux-aarch64) [[ ! -r /dev/kvm ]] || { accel=kvm; cpu=host; } ;;
   esac
-  exec qemu-system-aarch64 -machine "virt,accel=${accel}" -cpu "$cpu" -m 4096 -smp 2 \
-    -drive if=pflash,format=raw,readonly=on,file="$firmware" \
-    -cdrom "$iso" \
+  vm="$project/vm-test"
+  mkdir -p "$vm"
+  [[ -f $vm/edk2-vars.fd ]] || truncate -s 64M "$vm/edk2-vars.fd"
+  [[ -f $vm/disposable.qcow2 ]] || qemu-img create -f qcow2 "$vm/disposable.qcow2" 16G
+  exec qemu-system-aarch64 -name PryOS -machine "virt,accel=${accel}" -cpu "$cpu" -m 4096 -smp 2 \
+    -drive if=pflash,unit=0,format=raw,readonly=on,file="$firmware" \
+    -drive if=pflash,unit=1,format=raw,file="$vm/edk2-vars.fd" \
     -device virtio-gpu-pci \
-    -device qemu-xhci -device usb-kbd -device usb-tablet \
+    -display default,show-cursor=on \
+    -device qemu-xhci,id=xhci \
+    -device usb-kbd,bus=xhci.0 \
+    -device usb-tablet,bus=xhci.0 \
+    -drive if=none,id=cdrom,media=cdrom,readonly=on,file="$iso" \
+    -device usb-storage,bus=xhci.0,drive=cdrom \
+    -drive if=virtio,file="$vm/disposable.qcow2",discard=unmap \
     -nic user,model=virtio-net-pci
 fi
 

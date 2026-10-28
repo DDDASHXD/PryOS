@@ -55,6 +55,10 @@ id pryos-browser
 '
 if find "$root/root" "$root/home" "$root/etc/skel" "$root/opt" -type f -name auth.json -print -quit | grep -q .; then echo 'Unexpected auth.json in image'; exit 1; fi
 [[ $(find "$root/etc/skel/Desktop" -name '*.desktop' | wc -l) -ge 20 ]]
+[[ $(find "$root/etc/skel/Desktop" -name '*.desktop' ! -perm -111 | wc -l) == 0 ]]
+grep -q 'metadata::xfce-exe-checksum' "$root/usr/local/bin/recovery-trust-launchers"
+! grep -q 'name="panel-2"' "$root/etc/xdg/xfce4/panel/default.xml"
+! grep -q 'name="panel-2"' "$root/etc/skel/.config/xfce4/xfconf/xfce-perchannel-xml/xfce4-panel.xml"
 [[ ! -d $root/var/lib/snapd/snaps ]]
 grep -q 'pryos-browser.desktop' "$root/etc/skel/.config/mimeapps.list"
 grep -q 'PryOS' "$root/etc/os-release"

@@ -16,4 +16,5 @@ greeter-hide-users=true
 allow-guest=false
 EOF
 printf '[Desktop]\nSession=xfce\n' > /root/.dmrc
-chmod 0755 /root/Desktop/*.desktop
+install -d -m 0700 /run/user/0
+XDG_RUNTIME_DIR=/run/user/0 timeout 30 dbus-run-session -- recovery-trust-launchers /root/Desktop || true
