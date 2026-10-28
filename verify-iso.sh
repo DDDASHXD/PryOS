@@ -56,6 +56,11 @@ test -d /etc/skel/Desktop/disks
 test -d /etc/skel/Desktop/windows
 test -d /etc/skel/Desktop/system
 test ! -e /usr/share/applications/recovery-01-ai-agents.desktop
+test -s /usr/share/backgrounds/pryos.jpg
+test -s /usr/share/icons/hicolor/scalable/apps/pryos-menu.svg
+grep -q 'pryos-menu.svg' /etc/skel/.config/xfce4/xfconf/xfce-perchannel-xml/xfce4-panel.xml
+grep -q 'data:image/jpeg' /usr/share/backgrounds/xfce/xfce-shapes.svg
+grep -q xrandr /usr/local/bin/recovery-desktop-init
 id pryos-browser
 '
 if find "$root/root" "$root/home" "$root/etc/skel" "$root/opt" -type f -name auth.json -print -quit | grep -q .; then echo 'Unexpected auth.json in image'; exit 1; fi

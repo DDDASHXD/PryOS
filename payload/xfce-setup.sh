@@ -108,7 +108,6 @@ Type=Application
 Name=PryOS desktop setup
 Exec=recovery-desktop-init
 OnlyShowIn=XFCE;
-X-GNOME-Autostart-Phase=Initialization
 EOF
 cp "$src/AGENTS.md" /etc/skel/Recovery/CLAUDE.md
 cp "$src/AGENTS.md" /etc/skel/Recovery/GEMINI.md
@@ -119,8 +118,26 @@ install -d /root/Desktop
 cp -a /etc/skel/Desktop/. /root/Desktop/
 install -d /root/.codex
 cp "$src/codex-config.toml" /root/.codex/config.toml
-install -d /usr/share/backgrounds
-install -m 0644 "$src/pryos.svg" /usr/share/backgrounds/pryos.svg
+install -d /usr/share/backgrounds/xfce
+install -m 0644 "$src/pryos.jpg" /usr/share/backgrounds/pryos.jpg
+install -D -m 0644 "$src/pryos-menu.svg" /usr/share/icons/hicolor/scalable/apps/pryos-menu.svg
+rm -f /usr/share/backgrounds/pryos.svg
+# xfdesktop 4.18 uses this file when a monitor has no saved image. A real output
+# is never named monitor0, so the per-user setting alone leaves the stock graphic.
+python3 - <<'PY'
+import base64
+import pathlib
+image = pathlib.Path("/usr/share/backgrounds/pryos.jpg").read_bytes()
+encoded = base64.b64encode(image).decode()
+path = pathlib.Path("/usr/share/backgrounds/xfce/xfce-shapes.svg")
+path.write_text(
+    '<?xml version="1.0" encoding="UTF-8"?>\n'
+    '<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="576" viewBox="0 0 1024 576">\n'
+    f'<image width="1024" height="576" href="data:image/jpeg;base64,{encoded}"/>\n'
+    '</svg>\n'
+)
+path.chmod(0o644)
+PY
 printf '[Added Associations]\nx-scheme-handler/http=pryos-browser.desktop;\nx-scheme-handler/https=pryos-browser.desktop;\ntext/html=pryos-browser.desktop;\n[Default Applications]\nx-scheme-handler/http=pryos-browser.desktop\nx-scheme-handler/https=pryos-browser.desktop\ntext/html=pryos-browser.desktop\n' > /etc/skel/.config/mimeapps.list
 cat > /usr/share/applications/pryos-browser.desktop <<'EOF'
 [Desktop Entry]

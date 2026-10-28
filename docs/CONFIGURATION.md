@@ -34,7 +34,8 @@ Changing the base ISO means updating the name, URL, and checksum together, then 
 - `payload/custom/` is copied to `/opt/recovery/custom` and added to `PATH`
 - `payload/AGENTS.md` is copied into the live session for the agents
 - `payload/codex-config.toml` is the Codex config for the live home
-- `payload/pryos.svg` is the wallpaper
+- `payload/pryos.jpg` is the wallpaper
+- `payload/pryos-menu.svg` is the applications menu icon
 - `prepare-boot.py` writes the boot menu
 
 Edits apply on the next build. An ISO you already made stays as it is.

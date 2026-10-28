@@ -4,7 +4,37 @@ recovery-trust-launchers "$HOME/Desktop"
 xfconf-query -c xfwm4 -p /general/use_compositing -n -t bool -s false 2>/dev/null || true
 xfconf-query -c thunar-volman -p /automount-drives/enabled -n -t bool -s false 2>/dev/null || true
 xfconf-query -c thunar-volman -p /automount-media/enabled -n -t bool -s false 2>/dev/null || true
-while IFS= read -r property; do
-  [[ $property == */last-image ]] || continue
-  xfconf-query -c xfce4-desktop -p "$property" -s /usr/share/backgrounds/pryos.svg 2>/dev/null || true
-done < <(xfconf-query -c xfce4-desktop -l 2>/dev/null)
+
+wallpaper=/usr/share/backgrounds/pryos.jpg
+
+apply_wallpaper() {
+  local names=() name property monitor workspace
+  if command -v xrandr >/dev/null 2>&1; then
+    while IFS= read -r name; do
+      [[ -n $name ]] && names+=("$name")
+    done < <(xrandr --query 2>/dev/null | awk '/ connected/{print $1}')
+  fi
+  names+=(0)
+  for monitor in "${names[@]}"; do
+    for workspace in 0 1 2 3; do
+      property="/backdrop/screen0/monitor${monitor}/workspace${workspace}"
+      xfconf-query -c xfce4-desktop -p "${property}/last-image" -n -t string -s "$wallpaper" 2>/dev/null || true
+      xfconf-query -c xfce4-desktop -p "${property}/image-style" -n -t int -s 5 2>/dev/null || true
+    done
+  done
+  while IFS= read -r property; do
+    [[ $property == */last-image ]] || continue
+    xfconf-query -c xfce4-desktop -p "$property" -t string -s "$wallpaper" 2>/dev/null || true
+    xfconf-query -c xfce4-desktop -p "${property%/last-image}/image-style" -n -t int -s 5 2>/dev/null || true
+  done < <(xfconf-query -c xfce4-desktop -l 2>/dev/null || true)
+  xfdesktop --reload >/dev/null 2>&1 || true
+}
+
+# xfdesktop creates the real monitor name after this autostart entry, then fills
+# it with the package default. Keep applying until that entry exists.
+(
+  for _ in 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20; do
+    apply_wallpaper
+    sleep 1
+  done
+) &

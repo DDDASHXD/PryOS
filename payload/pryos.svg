@@ -1,8 +1,0 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="1920" height="1080" viewBox="0 0 1920 1080">
-<defs><linearGradient id="bg" x2="1" y2="1"><stop stop-color="#101b2c"/><stop offset="1" stop-color="#07111f"/></linearGradient><pattern id="grid" width="80" height="80" patternUnits="userSpaceOnUse"><path d="M80 0H0V80" fill="none" stroke="#a7d6e8" stroke-opacity=".035"/></pattern></defs>
-<path fill="url(#bg)" d="M0 0H1920V1080H0z"/><path fill="url(#grid)" d="M0 0H1920V1080H0z"/>
-<circle cx="1450" cy="470" r="190" fill="none" stroke="#58d8c5" stroke-opacity=".12" stroke-width="2"/><circle cx="1450" cy="470" r="230" fill="none" stroke="#58d8c5" stroke-opacity=".06"/>
-<text x="1110" y="520" fill="#eef6fa" font-family="DejaVu Sans,sans-serif" font-size="112" font-weight="bold">Pry<tspan fill="#58d8c5">OS</tspan></text>
-<text x="1118" y="574" fill="#90a8bd" font-family="DejaVu Sans,sans-serif" font-size="18" letter-spacing="4">RECOVERY / DIAGNOSTICS / AI</text>
-<text x="1118" y="940" fill="#5b7187" font-family="DejaVu Sans,sans-serif" font-size="17">A fresh start. Every boot.</text>
-</svg>
