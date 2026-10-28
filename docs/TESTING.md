@@ -23,7 +23,7 @@ Try the ISO in a VM before you point it at a disk you care about.
 
 1. Boot the normal entry. XFCE should come up with the PryOS wallpaper and the desktop shortcuts.
 2. In Root Terminal, `id -u` prints `0`.
-3. Open an agent and a recovery tool from the desktop.
+3. Open an agent from the agents folder and a disk tool from the disks folder.
 4. `cat /proc/cmdline` includes `nopersistent`.
 5. Create a file in `/root`, reboot, and confirm it is gone.
 6. On a disposable NTFS disk, `recovery-mount-windows` should mount it read-only.

@@ -92,34 +92,45 @@ Path('/etc/xdg/xfce4/panel/default.xml').write_text(panel_xml)
 ''')
 (Path('/etc/skel/.config/xfce4') / 'helpers.rc').write_text('WebBrowser=pryos-helium\nTerminalEmulator=xfce4-terminal\nFileManager=Thunar\n')
 
+desktop_root = Path('/etc/skel/Desktop')
+apps = Path('/usr/share/applications')
+desktop_root.mkdir(parents=True, exist_ok=True)
+apps.mkdir(parents=True, exist_ok=True)
+for stale in list(desktop_root.glob('recovery-*.desktop')) + list(apps.glob('recovery-*.desktop')):
+    stale.unlink()
 entries = [
-    ('01-ai-agents', 'AI Agents', 'recovery-agent choose', 'applications-science', False),
-    ('02-codex', 'Codex', 'recovery-agent codex', 'utilities-terminal', True),
-    ('03-claude', 'Claude Code', 'recovery-agent claude', 'utilities-terminal', True),
-    ('04-gemini', 'Gemini CLI', 'recovery-agent gemini', 'utilities-terminal', True),
-    ('05-opencode', 'OpenCode', 'recovery-agent opencode', 'utilities-terminal', True),
-    ('06-terminal', 'Root Terminal', 'xfce4-terminal --default-working-directory=/root/Recovery', 'utilities-terminal', False),
-    ('10-gparted', 'GParted', 'gparted', 'gparted', False),
-    ('11-testdisk', 'TestDisk', 'recovery-tool testdisk', 'drive-harddisk', True),
-    ('12-photorec', 'PhotoRec', 'recovery-tool photorec', 'camera-photo', True),
-    ('13-smart', 'Disk Health - GSmartControl', 'gsmartcontrol', 'gsmartcontrol', False),
-    ('14-disks', 'Disks', 'gnome-disks', 'drive-harddisk', False),
-    ('15-inventory', 'System Inventory', 'recovery-tool inventory', 'computer', True),
-    ('16-windows', 'Inspect Windows', 'recovery-tool windows', 'drive-harddisk', True),
-    ('17-ntfs', 'NTFS Utilities', 'recovery-tool ntfs', 'drive-harddisk', True),
-    ('18-ddrescue', 'Disk Imaging - ddrescue', 'recovery-tool ddrescue', 'drive-harddisk', True),
-    ('19-efi', 'EFI Boot Entries', 'recovery-tool efi', 'computer', True),
-    ('20-nvme', 'NVMe Inventory', 'recovery-tool nvme', 'drive-harddisk', True),
-    ('21-accounts', 'Local Windows Accounts - chntpw', 'recovery-tool passwords', 'dialog-password', True),
-    ('22-files', 'Files', 'thunar /root/Recovery', 'system-file-manager', False),
-    ('23-network', 'Network Connections', 'nm-connection-editor', 'network-wired', False),
-    ('24-browser', 'Helium', 'pryos-browser', 'helium', False),
-    ('25-notes', 'START HERE', 'mousepad /root/Recovery/START-HERE.txt', 'help-about', False),
+    ('agents', '02-codex', 'Codex', 'recovery-agent codex', 'utilities-terminal', True),
+    ('agents', '03-claude', 'Claude Code', 'recovery-agent claude', 'utilities-terminal', True),
+    ('agents', '04-gemini', 'Gemini CLI', 'recovery-agent gemini', 'utilities-terminal', True),
+    ('agents', '05-opencode', 'OpenCode', 'recovery-agent opencode', 'utilities-terminal', True),
+    ('disks', '10-gparted', 'GParted', 'gparted', 'gparted', False),
+    ('disks', '11-testdisk', 'TestDisk', 'recovery-tool testdisk', 'drive-harddisk', True),
+    ('disks', '12-photorec', 'PhotoRec', 'recovery-tool photorec', 'camera-photo', True),
+    ('disks', '13-smart', 'Disk Health - GSmartControl', 'gsmartcontrol', 'gsmartcontrol', False),
+    ('disks', '14-disks', 'Disks', 'gnome-disks', 'drive-harddisk', False),
+    ('disks', '17-ntfs', 'NTFS Utilities', 'recovery-tool ntfs', 'drive-harddisk', True),
+    ('disks', '18-ddrescue', 'Disk Imaging - ddrescue', 'recovery-tool ddrescue', 'drive-harddisk', True),
+    ('disks', '20-nvme', 'NVMe Inventory', 'recovery-tool nvme', 'drive-harddisk', True),
+    ('windows', '16-windows', 'Inspect Windows', 'recovery-tool windows', 'drive-harddisk', True),
+    ('windows', '19-efi', 'EFI Boot Entries', 'recovery-tool efi', 'computer', True),
+    ('windows', '21-accounts', 'Local Windows Accounts - chntpw', 'recovery-tool passwords', 'dialog-password', True),
+    ('system', '06-terminal', 'Root Terminal', 'xfce4-terminal --default-working-directory=/root/Recovery', 'utilities-terminal', False),
+    ('system', '15-inventory', 'System Inventory', 'recovery-tool inventory', 'computer', True),
+    ('system', '22-files', 'Files', 'thunar /root/Recovery', 'system-file-manager', False),
+    ('system', '23-network', 'Network Connections', 'nm-connection-editor', 'network-wired', False),
+    ('system', '24-browser', 'Helium', 'pryos-browser', 'helium', False),
+    ('system', '25-notes', 'START HERE', 'mousepad /root/Recovery/START-HERE.txt', 'help-about', False),
 ]
-for key, name, command, icon, terminal in entries:
+for folder in ('agents', 'disks', 'windows', 'system'):
+    folder_dir = desktop_root / folder
+    folder_dir.mkdir(parents=True, exist_ok=True)
+    for stale in folder_dir.glob('recovery-*.desktop'):
+        stale.unlink()
+for folder, key, name, command, icon, terminal in entries:
     contents = f'[Desktop Entry]\nVersion=1.0\nType=Application\nName={name}\nExec={command}\nIcon={icon}\nTerminal={str(terminal).lower()}\nCategories=System;\nStartupNotify=false\n'
-    for directory in (Path('/etc/skel/Desktop'), Path('/usr/share/applications')):
-        directory.mkdir(parents=True, exist_ok=True)
-        path = directory / f'recovery-{key}.desktop'
-        path.write_text(contents)
-        path.chmod(0o755)
+    menu_entry = apps / f'recovery-{key}.desktop'
+    menu_entry.write_text(contents)
+    menu_entry.chmod(0o755)
+    launcher = desktop_root / folder / f'recovery-{key}.desktop'
+    launcher.write_text(contents)
+    launcher.chmod(0o755)

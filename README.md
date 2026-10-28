@@ -67,17 +67,7 @@ bash scripts/build-macos.sh arm64
 
 With no argument, an Apple Silicon Mac builds the ARM64 image and an Intel Mac builds the PC image.
 
-Details are in [Building](docs/BUILDING.md), [Configuration](docs/CONFIGURATION.md), and [Testing](docs/TESTING.md).
-
-## Boot
-
-Copy the ISO to a Ventoy stick with persistence left off. The menu has a normal entry, a safe graphics entry, and a text entry.
-
-Boot `pryos-amd64.iso` on an x86-64 PC. In VirtualBox, use a 64-bit machine with long mode on, two CPUs, and about 4 GB of RAM.
-
-Boot `pryos-arm64.iso` on an ARM64 machine with UEFI. On an Apple Silicon Mac, use UTM or `bash scripts/test-qemu.sh out/pryos-arm64.iso`.
-
-The desktop logs in as root. Connect to a network and open an agent from the desktop.
+Details are in Building, Configuration, and Testing.
 
 ## Windows disks
 

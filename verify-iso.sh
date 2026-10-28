@@ -50,7 +50,12 @@ if status=$(codex login status 2>&1); then echo "Unexpected signed-in Codex"; ex
 printf "%s\n" "$status"
 grep -q "Not logged in" <<< "$status"
 visudo -cf /etc/sudoers.d/99-recovery
-desktop-file-validate /etc/skel/Desktop/*.desktop
+find /etc/skel/Desktop -type f -name '*.desktop' -exec desktop-file-validate {} +
+test -d /etc/skel/Desktop/agents
+test -d /etc/skel/Desktop/disks
+test -d /etc/skel/Desktop/windows
+test -d /etc/skel/Desktop/system
+test ! -e /usr/share/applications/recovery-01-ai-agents.desktop
 id pryos-browser
 '
 if find "$root/root" "$root/home" "$root/etc/skel" "$root/opt" -type f -name auth.json -print -quit | grep -q .; then echo 'Unexpected auth.json in image'; exit 1; fi

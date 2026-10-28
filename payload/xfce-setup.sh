@@ -114,6 +114,7 @@ cp "$src/AGENTS.md" /etc/skel/Recovery/CLAUDE.md
 cp "$src/AGENTS.md" /etc/skel/Recovery/GEMINI.md
 
 python3 "$src/make-desktop.py"
+rm -rf /root/Desktop
 install -d /root/Desktop
 cp -a /etc/skel/Desktop/. /root/Desktop/
 install -d /root/.codex

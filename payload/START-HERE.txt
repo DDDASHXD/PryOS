@@ -4,8 +4,9 @@ The desktop and terminal run as root. No sudo/root password is needed.
 Changes to attached disks are permanent even though this OS resets on reboot.
 AI permission/trust prompts are independent of Linux authentication.
 
-Desktop shortcuts include Codex, Claude Code, Gemini CLI and OpenCode.
-Use AI Agents to choose one, or open several agent terminals at the same time.
+The agents folder has Codex, Claude Code, Gemini CLI and OpenCode.
+Open several of them if you want more than one terminal.
+Disk tools are in disks. Windows tools are in windows. The rest are in system.
 Connect to Wi-Fi/Ethernet first, then sign in with your own provider account.
 Claude uses /login; OpenCode uses /connect; Gemini offers Google sign-in.
 OpenCode also supports multiple providers and configured local model endpoints.
