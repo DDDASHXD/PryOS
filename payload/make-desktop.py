@@ -41,7 +41,7 @@ panel_xml = '''<?xml version="1.0" encoding="UTF-8"?>
   <property name="plugins" type="empty">
     <property name="plugin-1" type="string" value="applicationsmenu">
       <property name="button-icon" type="string" value="/usr/share/icons/hicolor/scalable/apps/pryos-menu.svg"/>
-      <property name="button-title" type="string" value=""/>
+      <property name="button-title" type="string" value="Applications"/>
     </property>
     <property name="plugin-2" type="string" value="tasklist">
       <property name="grouping" type="uint" value="1"/>
@@ -87,6 +87,13 @@ Path('/etc/xdg/xfce4/panel/default.xml').write_text(panel_xml)
 <property name="autobrowse" type="empty"><property name="enabled" type="bool" value="false"/></property>
 </channel>
 ''')
+(settings / 'xsettings.xml').write_text('''<?xml version="1.0" encoding="UTF-8"?>
+<channel name="xsettings" version="1.0">
+  <property name="Net" type="empty">
+    <property name="IconThemeName" type="string" value="Yaru-dark"/>
+  </property>
+</channel>
+''')
 (settings / 'xfce4-desktop.xml').write_text('''<?xml version="1.0" encoding="UTF-8"?>
 <channel name="xfce4-desktop" version="1.0">
 <property name="backdrop" type="empty">
@@ -111,41 +118,41 @@ desktop_root = Path('/etc/skel/Desktop')
 apps = Path('/usr/share/applications')
 desktop_root.mkdir(parents=True, exist_ok=True)
 apps.mkdir(parents=True, exist_ok=True)
-for stale in list(desktop_root.glob('recovery-*.desktop')) + list(apps.glob('recovery-*.desktop')):
+for stale in apps.glob('recovery-[0-9]*.desktop'):
     stale.unlink()
 entries = [
-    ('agents', '02-codex', 'Codex', 'recovery-agent codex', 'utilities-terminal', True),
-    ('agents', '03-claude', 'Claude Code', 'recovery-agent claude', 'utilities-terminal', True),
-    ('agents', '04-gemini', 'Gemini CLI', 'recovery-agent gemini', 'utilities-terminal', True),
-    ('agents', '05-opencode', 'OpenCode', 'recovery-agent opencode', 'utilities-terminal', True),
-    ('disks', '10-gparted', 'GParted', 'gparted', 'gparted', False),
-    ('disks', '11-testdisk', 'TestDisk', 'recovery-tool testdisk', 'drive-harddisk', True),
-    ('disks', '12-photorec', 'PhotoRec', 'recovery-tool photorec', 'camera-photo', True),
-    ('disks', '13-smart', 'Disk Health - GSmartControl', 'gsmartcontrol', 'gsmartcontrol', False),
-    ('disks', '14-disks', 'Disks', 'gnome-disks', 'drive-harddisk', False),
-    ('disks', '17-ntfs', 'NTFS Utilities', 'recovery-tool ntfs', 'drive-harddisk', True),
-    ('disks', '18-ddrescue', 'Disk Imaging - ddrescue', 'recovery-tool ddrescue', 'drive-harddisk', True),
-    ('disks', '20-nvme', 'NVMe Inventory', 'recovery-tool nvme', 'drive-harddisk', True),
-    ('windows', '16-windows', 'Inspect Windows', 'recovery-tool windows', 'drive-harddisk', True),
-    ('windows', '19-efi', 'EFI Boot Entries', 'recovery-tool efi', 'computer', True),
-    ('windows', '21-accounts', 'Local Windows Accounts - chntpw', 'recovery-tool passwords', 'dialog-password', True),
-    ('system', '06-terminal', 'Root Terminal', 'xfce4-terminal --default-working-directory=/root/Recovery', 'utilities-terminal', False),
-    ('system', '15-inventory', 'System Inventory', 'recovery-tool inventory', 'computer', True),
-    ('system', '22-files', 'Files', 'thunar /root/Recovery', 'system-file-manager', False),
-    ('system', '23-network', 'Network Connections', 'nm-connection-editor', 'network-wired', False),
-    ('system', '24-browser', 'Helium', 'pryos-browser', 'helium', False),
-    ('system', '25-notes', 'START HERE', 'mousepad /root/Recovery/START-HERE.txt', 'help-about', False),
+    ('agents', 'Codex', 'pryos-codex', 'Codex', 'recovery-agent codex', 'utilities-terminal', True),
+    ('agents', 'Claude Code', 'pryos-claude', 'Claude Code', 'recovery-agent claude', 'utilities-terminal', True),
+    ('agents', 'Gemini CLI', 'pryos-gemini', 'Gemini CLI', 'recovery-agent gemini', 'utilities-terminal', True),
+    ('agents', 'OpenCode', 'pryos-opencode', 'OpenCode', 'recovery-agent opencode', 'utilities-terminal', True),
+    ('disks', 'GParted', 'pryos-gparted', 'GParted', 'gparted', 'gparted', False),
+    ('disks', 'TestDisk', 'pryos-testdisk', 'TestDisk', 'recovery-tool testdisk', 'drive-harddisk', True),
+    ('disks', 'PhotoRec', 'pryos-photorec', 'PhotoRec', 'recovery-tool photorec', 'camera-photo', True),
+    ('disks', 'Disk Health', 'pryos-disk-health', 'Disk Health', 'gsmartcontrol', 'gsmartcontrol', False),
+    ('disks', 'Disks', 'pryos-disks', 'Disks', 'gnome-disks', 'gnome-disks', False),
+    ('disks', 'NTFS Utilities', 'pryos-ntfs', 'NTFS Utilities', 'recovery-tool ntfs', 'drive-harddisk', True),
+    ('disks', 'Disk Imaging', 'pryos-ddrescue', 'Disk Imaging', 'recovery-tool ddrescue', 'drive-harddisk', True),
+    ('disks', 'NVMe Inventory', 'pryos-nvme', 'NVMe Inventory', 'recovery-tool nvme', 'drive-harddisk', True),
+    ('windows', 'Inspect Windows', 'pryos-windows', 'Inspect Windows', 'recovery-tool windows', 'drive-harddisk', True),
+    ('windows', 'EFI Boot Entries', 'pryos-efi', 'EFI Boot Entries', 'recovery-tool efi', 'computer', True),
+    ('windows', 'Windows Accounts', 'pryos-accounts', 'Windows Accounts', 'recovery-tool passwords', 'dialog-password', True),
+    ('system', 'Root Terminal', 'pryos-terminal', 'Root Terminal', 'xfce4-terminal --default-working-directory=/root/Recovery', 'org.xfce.terminal', False),
+    ('system', 'System Inventory', 'pryos-inventory', 'System Inventory', 'recovery-tool inventory', 'computer', True),
+    ('system', 'Files', 'pryos-files', 'Files', 'thunar /root/Recovery', 'system-file-manager', False),
+    ('system', 'Network', 'pryos-network', 'Network', 'nm-connection-editor', 'nm-device-wired', False),
+    ('system', 'Helium', 'pryos-helium-browser', 'Helium', 'pryos-browser', 'helium', False),
+    ('system', 'START HERE', 'pryos-start-here', 'START HERE', 'mousepad /root/Recovery/START-HERE.txt', 'help-about', False),
 ]
 for folder in ('agents', 'disks', 'windows', 'system'):
     folder_dir = desktop_root / folder
     folder_dir.mkdir(parents=True, exist_ok=True)
-    for stale in folder_dir.glob('recovery-*.desktop'):
+    for stale in folder_dir.glob('*.desktop'):
         stale.unlink()
-for folder, key, name, command, icon, terminal in entries:
+for folder, filename, menu_id, name, command, icon, terminal in entries:
     contents = f'[Desktop Entry]\nVersion=1.0\nType=Application\nName={name}\nExec={command}\nIcon={icon}\nTerminal={str(terminal).lower()}\nCategories=System;\nStartupNotify=false\n'
-    menu_entry = apps / f'recovery-{key}.desktop'
+    menu_entry = apps / f'{menu_id}.desktop'
     menu_entry.write_text(contents)
     menu_entry.chmod(0o755)
-    launcher = desktop_root / folder / f'recovery-{key}.desktop'
+    launcher = desktop_root / folder / f'{filename}.desktop'
     launcher.write_text(contents)
     launcher.chmod(0o755)

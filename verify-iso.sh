@@ -56,6 +56,12 @@ test -d /etc/skel/Desktop/disks
 test -d /etc/skel/Desktop/windows
 test -d /etc/skel/Desktop/system
 test ! -e /usr/share/applications/recovery-01-ai-agents.desktop
+test ! -e /etc/skel/Desktop/agents/recovery-02-codex.desktop
+test -f "/etc/skel/Desktop/agents/Codex.desktop"
+test -f "/etc/skel/Desktop/system/Root Terminal.desktop"
+grep -q org.xfce.terminal "/etc/skel/Desktop/system/Root Terminal.desktop"
+grep -q nm-device-wired "/etc/skel/Desktop/system/Network.desktop"
+grep -q Yaru-dark /etc/skel/.config/xfce4/xfconf/xfce-perchannel-xml/xsettings.xml
 test -s /usr/share/backgrounds/pryos.jpg
 test -s /usr/share/icons/hicolor/scalable/apps/pryos-menu.svg
 grep -q 'pryos-menu.svg' /etc/skel/.config/xfce4/xfconf/xfce-perchannel-xml/xfce4-panel.xml
